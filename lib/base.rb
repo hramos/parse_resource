@@ -92,6 +92,7 @@ module ParseResource
           end
           
           val = val.to_pointer if val.respond_to?(:to_pointer)
+          val = {"__type"=>"Date","iso"=>val.to_s} if val.is_a?(DateTime)
 
           @attributes[k.to_s] = val
           @unsaved_attributes[k.to_s] = val
@@ -112,7 +113,9 @@ module ParseResource
               result = klass_name.constantize.find(@attributes[k]["objectId"])
             when "Object"
               result = klass_name.constantize.new(@attributes[k], false)
-            end #todo: support Dates and other types https://www.parse.com/docs/rest#objects-types
+            when "Date"
+              result = DateTime.iso8601(@attributes[k]["iso"])
+            end #todo: support Bytes and other types https://www.parse.com/docs/rest#objects-types            
             
           else
             result =  @attributes[k]
